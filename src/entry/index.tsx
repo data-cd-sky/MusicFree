@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import bootstrap from "./bootstrap/bootstrap";
@@ -13,10 +13,11 @@ import globalStyle from "@/constants/globalStyle";
 import Theme from "@/core/theme";
 import { BootstrapComponent } from "./bootstrap/BootstrapComponent";
 import { ToastBaseComponent } from "@/components/base/toast";
-import { StatusBar } from "react-native";
+import { Platform, StatusBar } from "react-native";
 import { ReduceMotion, ReducedMotionConfig } from "react-native-reanimated";
 import { routes } from "@/core/router/routes.tsx";
 import ErrorBoundary from "@/components/errorBoundary";
+import { initializeIOSModule } from "@/native/ios";
 
 /**
  * 字体颜色
@@ -30,6 +31,21 @@ const Stack = createNativeStackNavigator<any>();
 
 export default function Pages() {
     const theme = Theme.useTheme();
+
+    // 初始化iOS模块
+    useEffect(() => {
+        // 仅在iOS平台执行
+        if (Platform.OS === 'ios') {
+            const cleanup = initializeIOSModule();
+            
+            // 组件卸载时清理资源
+            return () => {
+                if (cleanup && typeof cleanup === 'function') {
+                    cleanup();
+                }
+            };
+        }
+    }, []);
 
     return (
         <ErrorBoundary>

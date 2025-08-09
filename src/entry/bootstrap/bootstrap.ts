@@ -14,6 +14,7 @@ import PluginManager from "@/core/pluginManager";
 import Theme from "@/core/theme";
 import TrackPlayer from "@/core/trackPlayer";
 import NativeUtils from "@/native/utils";
+import { initializeIOSServices } from "@/native/ios/iosServices";
 import { checkAndCreateDir } from "@/utils/fileUtils";
 import { errorLog, trace } from "@/utils/log";
 import { IPerfLogger, perfLogger } from "@/utils/perfLogger";
@@ -119,6 +120,13 @@ async function bootstrapImpl() {
     Theme.setup();
     trace("主题初始化完成");
     logger.mark("主题初始化完成");
+
+    // 初始化iOS特定服务
+    if (Platform.OS === 'ios') {
+        await initializeIOSServices();
+        trace("iOS服务初始化完成");
+        logger.mark("iOS服务初始化完成");
+    }
 
     extraMakeup();
 
@@ -263,7 +271,10 @@ async function extraMakeup() {
                     TrackPlayer.play(musicItem);
                 }
             }
-        } catch { }
+        } catch (error) {
+            console.error('处理URL时出错', error);
+            Toast.warn('处理URL时出错');
+        }
     }
 
     // 开启监听

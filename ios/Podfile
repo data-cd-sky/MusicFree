@@ -60,5 +60,16 @@ target 'MusicFree' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+    
+    # 修复iOS编译问题
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_FEATURES=1']
+        # 确保最低iOS版本一致
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+        # 修复arm64架构问题
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      end
+    end
   end
 end
